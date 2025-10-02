@@ -7,56 +7,98 @@ const PHOTO_CONFIG = [
     {
         id: 1,
         src: 'images/annecy-couple-and-fishermen.jpg',
-        alt: 'Couple and fishermen by the lake in Annecy',
+        alt: 'Photography by Arthur Stainmesse',
         tags: ['landscape', 'nature', 'water', 'people', 'clouds', 'france']
     },
     {
         id: 2,
         src: 'images/artificial-northern-lights.jpg',
-        alt: 'Artificial northern lights display',
+        alt: 'Photography by Arthur Stainmesse',
         tags: ['night', 'lights', 'ireland', 'artificial', 'urban']
     },
     {
         id: 3,
         src: 'images/ballycarbery-ruins.jpg',
-        alt: 'Ancient ruins of Ballycarbery Castle',
+        alt: 'Photography by Arthur Stainmesse',
         tags: ['landscape', 'ruins', 'history', 'architecture', 'ireland']
     },
     {
         id: 4,
         src: 'images/bád-eddie.jpg',
-        alt: 'Bád Eddie - Traditional Irish boat',
+        alt: 'Photography by Arthur Stainmesse',    
         tags: ['boat', 'traditional', 'ireland', 'water', 'culture']
     },
     {
         id: 5,
         src: 'images/chilling-shrine.jpg',
-        alt: 'Peaceful shrine in natural setting',
-        tags: ['ireland', 'spiritual', 'nature', 'peaceful', 'architecture']
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['ireland', 'spiritual', 'nature', 'eery', 'architecture']
     },
     {
         id: 6,
         src: 'images/competing-signs.jpg',
-        alt: 'Multiple competing street signs',
-        tags: ['urban', 'signs', 'street', 'city', 'humor', 'hong-kong']
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['urban', 'signs', 'street', 'city']
     },
     {
         id: 7,
         src: 'images/crow-dropping-from-radio-tower.jpg',
-        alt: 'Crow dropping from radio tower',
-        tags: ['wildlife', 'bird', 'tower', 'action', 'nature', 'ireland', 'animal']
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['bird', 'nature', 'ireland', 'animal', 'architecture']
     },
     {
         id: 8,
         src: 'images/floating-quaintness.jpg',
-        alt: 'Quaint floating structure on water',
-        tags: ['water', 'architecture', 'floating', 'peaceful', 'nature', 'china']
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['water', 'architecture', 'floating', 'peaceful', 'nature', 'boat']
     },
     {
         id: 9,
         src: 'images/frog-striking-a-pose.jpg',
-        alt: 'Frog striking a pose in natural habitat',
-        tags: ['wildlife', 'frog', 'nature', 'macro', 'animal', 'ireland']
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['frog', 'nature', 'macro', 'animal', 'ireland']
+    },
+    {
+        id: 10,
+        src: 'images/blue-hour-of-killarney.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['landscape', 'blue-hour', 'twilight', 'killarney', 'ireland', 'nature']
+    },
+    {
+        id: 11,
+        src: 'images/imperial-palace.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['architecture', 'palace', 'imperial', 'building', 'history', 'japan']
+    },
+    {
+        id: 12,
+        src: 'images/kenmare-pier.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['landscape', 'water', 'ireland', 'nature', 'signs']
+    },
+    {
+        id: 13,
+        src: 'images/late-summer-in-prague.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['urban', 'summer', 'city', 'vehicle']
+    },
+    {
+        id: 14,
+        src: 'images/late-summer-lights.JPG',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['urban', 'summer', 'lights', 'peaceful']
+    },
+    {
+        id: 15,
+        src: 'images/lovely-sky-on-bricks.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['architecture', 'sky', 'bricks', 'building', 'urban', 'clouds']
+    },
+    {
+        id: 16,
+        src: 'images/mobile-police-station.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['urban', 'vehicle', 'street', 'city']
     }
 ];
 

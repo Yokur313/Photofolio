@@ -151,6 +151,10 @@ class PhotoGallery {
             img.onload = () => {
                 photoItem.classList.add('loaded');
                 img.style.opacity = '1';
+                // Reset height to auto once image is loaded to allow natural sizing
+                img.style.height = 'auto';
+                // Remove min-height once loaded
+                img.style.minHeight = '0';
             };
         }
     }
@@ -175,7 +179,7 @@ class PhotoGallery {
     }
 
     /**
-     * Create a photo element with lazy loading
+     * Create a photo element with lazy loading and proper dimensions
      */
     createPhotoElement(photo) {
         const photoItem = document.createElement('div');
@@ -187,6 +191,15 @@ class PhotoGallery {
         img.dataset.src = photo.src;
         img.alt = photo.alt;
         img.loading = 'lazy';
+        
+        // Set dimensions if available to prevent layout shift
+        if (photo.width && photo.height) {
+            const aspectRatio = photo.height / photo.width;
+            img.style.aspectRatio = `${photo.width} / ${photo.height}`;
+            // Set a reasonable height based on column width estimate
+            const estimatedWidth = 400; // Approximate column width
+            img.style.height = `${estimatedWidth * aspectRatio}px`;
+        }
         
         photoItem.appendChild(img);
         
@@ -234,6 +247,19 @@ class PhotoGallery {
     enlargePhoto(photoItem) {
         photoItem.classList.add('enlarged');
         this.enlargedPhoto = photoItem;
+        
+        // Adjust positioning for very tall images
+        setTimeout(() => {
+            const photoRect = photoItem.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // If photo extends beyond viewport, adjust positioning
+            if (photoRect.height > viewportHeight * 0.95) {
+                photoItem.style.top = '5vh';
+                photoItem.style.transform = 'translateX(-50%)';
+                photoItem.style.maxHeight = '90vh';
+            }
+        }, 50);
         
         // Show caption with formatted filename after photo is fully positioned
         const img = photoItem.querySelector('img');
@@ -297,8 +323,8 @@ class PhotoGallery {
                 this.photoCaption.style.display = 'block';
             };
             
-            // Wait for CSS transition to complete (enlarged photo animation is 0.3s)
-            setTimeout(showAndPositionCaption, 350);
+            // Wait for CSS transition to complete (enlarged photo animation is 0.3s) + extra buffer
+            setTimeout(showAndPositionCaption, 500);
             
             // Also reposition on window resize or scroll
             this.repositionHandler = () => {
@@ -327,6 +353,11 @@ class PhotoGallery {
         photoItem.classList.remove('enlarged');
         this.enlargedPhoto = null;
         this.photoCaption.style.display = 'none';
+        
+        // Reset any custom positioning
+        photoItem.style.top = '';
+        photoItem.style.transform = '';
+        photoItem.style.maxHeight = '';
         
         // Clean up event listeners
         window.removeEventListener('resize', this.repositionHandler);

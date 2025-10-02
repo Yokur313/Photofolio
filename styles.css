@@ -21,6 +21,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-display: swap; /* Prevent font loading layout shifts */
 }
 
 /* ========================================
@@ -163,8 +164,15 @@ footer {
     width: 100%;
     height: auto;
     object-fit: contain;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, height 0.2s ease;
     display: block;
+    min-height: 200px; /* Prevent layout shift during loading */
+    background-color: #f9f9f9; /* Placeholder background */
+}
+
+.photo-item.loaded img {
+    min-height: 0; /* Remove min-height once loaded */
+    background-color: transparent;
 }
 
 .photo-item:hover {
@@ -180,13 +188,22 @@ footer {
     transform: translate(-50%, -50%);
     z-index: 1000;
     max-width: 95vw;
-    max-height: 85vh;
+    max-height: 90vh;
     margin-bottom: 0;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     width: auto;
     padding: 30px;
     background-color: #fff;
     border: 1px solid #ddd;
+    overflow: visible;
+}
+
+.photo-item.enlarged img {
+    max-width: 100%;
+    max-height: calc(90vh - 60px); /* Account for padding */
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 .photo-item.enlarged:hover {
