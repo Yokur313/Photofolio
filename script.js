@@ -60,27 +60,16 @@ class PhotoGallery {
     // ========================================
 
     /**
-     * Load photo data with metadata and tags
+     * Load photo data from external configuration file
      */
     loadPhotoData() {
         const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjlmOWY5Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJDb3VyaWVyLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5sb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';
         
-        this.photos = [
-            { id: 1, src: 'images/annecy-couple-and-fishermen.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'nature, water, human, cloud'], placeholder }
-            // { id: 1, src: 'images/photo1.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'nature'], placeholder },
-            // { id: 2, src: 'images/photo2.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'architecture'], placeholder },
-            // { id: 3, src: 'images/photo3.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'water'], placeholder },
-            // { id: 4, src: 'images/photo4.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'mountains'], placeholder },
-            // { id: 5, src: 'images/photo5.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'street'], placeholder },
-            // { id: 6, src: 'images/photo6.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'forest'], placeholder },
-            // { id: 7, src: 'images/photo7.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'sunset'], placeholder },
-            // { id: 8, src: 'images/photo8.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'night'], placeholder },
-            // { id: 9, src: 'images/photo9.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'wildlife'], placeholder },
-            // { id: 10, src: 'images/photo10.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'ocean'], placeholder },
-            // { id: 11, src: 'images/photo11.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'architecture'], placeholder },
-            // { id: 12, src: 'images/photo12.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'flowers'], placeholder },
-            // { id: 13, src: 'images/photo13.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['portrait', 'vertical'], placeholder }
-        ];
+        // Load photos from external configuration
+        this.photos = window.PHOTO_CONFIG.map(photo => ({
+            ...photo,
+            placeholder
+        }));
 
         // Collect all unique tags for filtering
         this.allTags.clear();
@@ -246,18 +235,79 @@ class PhotoGallery {
         photoItem.classList.add('enlarged');
         this.enlargedPhoto = photoItem;
         
-        // Show caption with formatted filename
+        // Show caption with formatted filename after photo is fully positioned
         const img = photoItem.querySelector('img');
         if (img && img.src) {
             const caption = this.formatCaption(img.src);
             this.photoCaption.textContent = caption;
-            this.photoCaption.style.display = 'block';
             
-            // Position caption below the enlarged photo
-            setTimeout(() => {
+            // Add click handler to copy caption text
+            this.photoCaption.onclick = (e) => {
+                e.stopPropagation(); // Prevent photo from closing
+                navigator.clipboard.writeText(caption).then(() => {
+                    const originalText = this.photoCaption.textContent;
+                    this.photoCaption.textContent = 'Caption copied!';
+                    setTimeout(() => {
+                        this.photoCaption.textContent = originalText;
+                    }, 1000);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = caption;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                });
+            };
+            
+            // Wait for CSS transitions to complete before positioning caption
+            const showAndPositionCaption = () => {
+                // Wait for the photo to be fully positioned
+                if (!photoItem.classList.contains('enlarged')) {
+                    return;
+                }
+                
                 const photoRect = photoItem.getBoundingClientRect();
-                this.photoCaption.style.top = (photoRect.bottom + 10) + 'px';
-            }, 50);
+                const captionHeight = 40; // Approximate caption height
+                const margin = 15; // Margin from photo frame
+                
+                // Ensure we have valid dimensions and the photo has finished animating
+                if (photoRect.width === 0 || photoRect.height === 0) {
+                    // Retry if dimensions aren't ready
+                    setTimeout(showAndPositionCaption, 50);
+                    return;
+                }
+                
+                // Position just below the photo frame (including padding)
+                let captionTop = photoRect.bottom + margin;
+                
+                // Ensure caption stays within viewport
+                if (captionTop + captionHeight > window.innerHeight - 20) {
+                    // If no space below, position above the photo frame
+                    captionTop = Math.max(photoRect.top - captionHeight - margin, 20);
+                }
+                
+                // Force the positioning and show the caption
+                this.photoCaption.style.position = 'fixed';
+                this.photoCaption.style.top = captionTop + 'px';
+                this.photoCaption.style.left = '50%';
+                this.photoCaption.style.transform = 'translateX(-50%)';
+                this.photoCaption.style.zIndex = '1001';
+                this.photoCaption.style.display = 'block';
+            };
+            
+            // Wait for CSS transition to complete (enlarged photo animation is 0.3s)
+            setTimeout(showAndPositionCaption, 350);
+            
+            // Also reposition on window resize or scroll
+            this.repositionHandler = () => {
+                if (this.photoCaption.style.display === 'block') {
+                    showAndPositionCaption();
+                }
+            };
+            window.addEventListener('resize', this.repositionHandler);
+            window.addEventListener('scroll', this.repositionHandler);
         }
         
         // Smooth scroll to center the enlarged photo
@@ -277,17 +327,25 @@ class PhotoGallery {
         photoItem.classList.remove('enlarged');
         this.enlargedPhoto = null;
         this.photoCaption.style.display = 'none';
+        
+        // Clean up event listeners
+        window.removeEventListener('resize', this.repositionHandler);
+        window.removeEventListener('scroll', this.repositionHandler);
     }
 
     /**
      * Format filename into readable caption
      * Example: "crystal-blue-lake.jpg" → "Crystal Blue Lake"
+     * Handles URL-encoded characters like %c3%a1 → á
      */
     formatCaption(src) {
         const filename = src.split('/').pop();
         const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
         
-        return nameWithoutExt
+        // Decode URL-encoded characters
+        const decoded = decodeURIComponent(nameWithoutExt);
+        
+        return decoded
             .replace(/[-_]/g, ' ')
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
