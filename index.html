@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arthur Stainmesse Photography</title>
+    <meta name="description" content="Minimal photography portfolio showcasing landscape, urban, and nature photography by Arthur Stainmesse">
+    <meta name="keywords" content="photography, portfolio, landscape, urban, nature, Arthur Stainmesse">
+    <meta name="author" content="Arthur Stainmesse">
+    
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header with site title -->
+    <header>
+        <h1>Arthur Stainmesse Photography</h1>
+    </header>
+
+    <!-- Main content area -->
+    <main>
+        <!-- Tag filtering system -->
+        <section class="tag-selector" id="tagSelector" aria-label="Photo filters">
+            <!-- Tag filters will be dynamically loaded here -->
+        </section>
+        
+        <!-- Photo gallery with masonry layout -->
+        <section class="gallery" id="gallery" aria-label="Photography portfolio">
+            <!-- Images will be dynamically loaded here with lazy loading -->
+        </section>
+        
+        <!-- Magnifier tool for enlarged photos (desktop only) -->
+        <div class="magnifier" id="magnifier" aria-hidden="true">
+            <img class="magnifier-image" id="magnifierImage" alt="Magnified view" loading="lazy">
+        </div>
+        
+        <!-- Photo caption for enlarged photos -->
+        <div class="photo-caption" id="photoCaption" aria-live="polite"></div>
+        
+        <!-- Camera gear modal -->
+        <div class="modal" id="gearModal" role="dialog" aria-labelledby="gearModalTitle" aria-hidden="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="gearModalTitle">Camera Gear</h2>
+                    <button class="modal-close" id="gearModalClose" aria-label="Close gear modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <ul class="gear-list">
+                        <li>Nikon D3200</li>
+                        <li>Nikon AF-S DX Nikkor 18-105mm f/3.5-5.6G ED VR</li>
+                        <li>Tokina AT-X PRO DX II AF 11-16 mm f/2.8</li>
+                        <li>Nikon AF Micro Nikkor 105mm f/2.8D</li>
+                        <li>Nikon AF-S Nikkor 28-300mm f/3.5-5.6G IF-ED VR</li>
+                        <li>Nikon AF-S Nikkor 50mm f/1.4G</li>
+                        <li>Sigma 70-300mm f4-5.6 APO DG Macro</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer with social links -->
+    <footer>
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/arthur-stainmesse/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">linkedin</a>
+            <a href="https://www.instagram.com/only_yokur/" target="_blank" rel="noopener noreferrer" aria-label="Instagram profile">instagram</a>
+            <button class="email-link" id="emailLink" aria-label="Copy email to clipboard">email</button>
+            <button class="gear-link" id="gearLink" aria-label="View camera gear">gear</button>
+        </div>
+        <p class="copyright">2025</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
