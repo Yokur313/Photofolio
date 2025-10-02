@@ -66,19 +66,20 @@ class PhotoGallery {
         const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjlmOWY5Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJDb3VyaWVyLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5sb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';
         
         this.photos = [
-            { id: 1, src: 'images/photo1.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'nature'], placeholder },
-            { id: 2, src: 'images/photo2.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'architecture'], placeholder },
-            { id: 3, src: 'images/photo3.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'water'], placeholder },
-            { id: 4, src: 'images/photo4.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'mountains'], placeholder },
-            { id: 5, src: 'images/photo5.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'street'], placeholder },
-            { id: 6, src: 'images/photo6.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'forest'], placeholder },
-            { id: 7, src: 'images/photo7.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'sunset'], placeholder },
-            { id: 8, src: 'images/photo8.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'night'], placeholder },
-            { id: 9, src: 'images/photo9.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'wildlife'], placeholder },
-            { id: 10, src: 'images/photo10.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'ocean'], placeholder },
-            { id: 11, src: 'images/photo11.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'architecture'], placeholder },
-            { id: 12, src: 'images/photo12.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'flowers'], placeholder },
-            { id: 13, src: 'images/photo13.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['portrait', 'vertical'], placeholder }
+            { id: 1, src: 'images/annecy-couple-and-fishermen.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'nature, water, human, cloud'], placeholder }
+            // { id: 1, src: 'images/photo1.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'nature'], placeholder },
+            // { id: 2, src: 'images/photo2.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'architecture'], placeholder },
+            // { id: 3, src: 'images/photo3.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'water'], placeholder },
+            // { id: 4, src: 'images/photo4.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'mountains'], placeholder },
+            // { id: 5, src: 'images/photo5.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'street'], placeholder },
+            // { id: 6, src: 'images/photo6.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'forest'], placeholder },
+            // { id: 7, src: 'images/photo7.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'sunset'], placeholder },
+            // { id: 8, src: 'images/photo8.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'night'], placeholder },
+            // { id: 9, src: 'images/photo9.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'wildlife'], placeholder },
+            // { id: 10, src: 'images/photo10.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['landscape', 'ocean'], placeholder },
+            // { id: 11, src: 'images/photo11.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['urban', 'architecture'], placeholder },
+            // { id: 12, src: 'images/photo12.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['nature', 'flowers'], placeholder },
+            // { id: 13, src: 'images/photo13.jpg', alt: 'Photography by Arthur Stainmesse', tags: ['portrait', 'vertical'], placeholder }
         ];
 
         // Collect all unique tags for filtering
