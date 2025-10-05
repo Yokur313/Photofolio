@@ -68,7 +68,7 @@ const PHOTO_CONFIG = [
         id: 11,
         src: 'images/imperial-palace.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['architecture', 'palace', 'imperial', 'building', 'history', 'japan']
+        tags: ['architecture', 'building', 'history', 'water', 'boat']
     },
     {
         id: 12,
@@ -99,6 +99,18 @@ const PHOTO_CONFIG = [
         src: 'images/mobile-police-station.jpg',
         alt: 'Photography by Arthur Stainmesse',
         tags: ['urban', 'vehicle', 'street', 'city']
+    },
+    {
+        id: 17,
+        src: 'images/glenveagh-castle-tower.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['architecture', 'vehicle', 'street', 'city']
+    },
+    {
+        id: 18,
+        src: 'images/ominous-dublin-evening.jpg',
+        alt: 'Photography by Arthur Stainmesse',
+        tags: ['architecture', 'street', 'city', 'ireland']
     }
 ];
 
