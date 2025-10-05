@@ -109,42 +109,16 @@ class PhotoGallery {
 
     /**
      * Sort photos by number of tags and render gallery
-     * No need to pre-load images - dimensions will be calculated on-demand
+     * All images use default dimensions initially - actual dimensions load on-demand
      */
     async calculateAspectRatiosAndSort() {
         // Sort by number of tags (most tags first)
         this.photos.sort((a, b) => b.tags.length - a.tags.length);
         
-        // Load dimensions for first few images only (for initial layout)
-        const initialLoadCount = Math.min(10, this.photos.length);
-        const initialPhotos = this.photos.slice(0, initialLoadCount);
-        
-        const photoPromises = initialPhotos.map(photo => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    photo.aspectRatio = img.width / img.height;
-                    photo.width = img.width;
-                    photo.height = img.height;
-                    resolve(photo);
-                };
-                img.onerror = () => {
-                    // Default to 4:3 aspect ratio if image fails to load
-                    photo.aspectRatio = 1.33;
-                    photo.width = 1200;
-                    photo.height = 900;
-                    resolve(photo);
-                };
-                img.src = photo.src;
-            });
-        });
-
-        await Promise.all(photoPromises);
-        
-        // Set default dimensions for remaining photos
-        this.photos.slice(initialLoadCount).forEach(photo => {
+        // Set default dimensions for all photos - no pre-loading
+        this.photos.forEach(photo => {
             if (!photo.aspectRatio) {
-                photo.aspectRatio = 1.33; // Default 4:3
+                photo.aspectRatio = 1.33; // Default 4:3 aspect ratio
                 photo.width = 1200;
                 photo.height = 900;
             }
@@ -185,35 +159,43 @@ class PhotoGallery {
         const img = photoItem.querySelector('img');
         const actualSrc = img.dataset.src;
         
-        if (actualSrc && !img.src.includes(actualSrc)) {
-            // Create a new image to load in background
-            const tempImg = new Image();
-            
-            tempImg.onload = () => {
-                // Update actual dimensions once loaded
-                const photo = this.photos.find(p => p.src === actualSrc);
-                if (photo && !photo.dimensionsLoaded) {
-                    photo.aspectRatio = tempImg.width / tempImg.height;
-                    photo.width = tempImg.width;
-                    photo.height = tempImg.height;
-                    photo.dimensionsLoaded = true;
-                }
-                
-                // Swap to actual image
-                img.src = actualSrc;
-                photoItem.classList.add('loaded');
-                img.style.opacity = '1';
-                img.style.height = 'auto';
-                img.style.minHeight = '0';
-            };
-            
-            tempImg.onerror = () => {
-                // Still try to load the image even if temp load fails
-                img.src = actualSrc;
-            };
-            
-            tempImg.src = actualSrc;
+        // Check if already loaded or loading
+        if (!actualSrc || img.src.includes(actualSrc) || img.dataset.loading === 'true') {
+            return;
         }
+        
+        // Mark as loading to prevent duplicate requests
+        img.dataset.loading = 'true';
+        
+        // Create a new image to load in background
+        const tempImg = new Image();
+        
+        tempImg.onload = () => {
+            // Update actual dimensions once loaded
+            const photo = this.photos.find(p => p.src === actualSrc);
+            if (photo && !photo.dimensionsLoaded) {
+                photo.aspectRatio = tempImg.width / tempImg.height;
+                photo.width = tempImg.width;
+                photo.height = tempImg.height;
+                photo.dimensionsLoaded = true;
+            }
+            
+            // Swap to actual image
+            img.src = actualSrc;
+            photoItem.classList.add('loaded');
+            img.style.opacity = '1';
+            img.style.height = 'auto';
+            img.style.minHeight = '0';
+            delete img.dataset.loading;
+        };
+        
+        tempImg.onerror = () => {
+            // Still try to load the image even if temp load fails
+            img.src = actualSrc;
+            delete img.dataset.loading;
+        };
+        
+        tempImg.src = actualSrc;
     }
 
     // ========================================
