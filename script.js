@@ -30,6 +30,8 @@ class PhotoGallery {
         this.enlargedPhoto = null;
         this.activeTags = new Set();
         this.allTags = new Set();
+        this.activeYears = new Set();
+        this.allYears = new Set();
         
         this.init();
     }
@@ -53,6 +55,26 @@ class PhotoGallery {
         this.setupMagnifier();
         this.setupGearModal();
         this.setupClickOutside();
+        this.setupResizeHandler();
+    }
+    
+    /**
+     * Setup window resize handler to re-render gallery on column count change
+     */
+    setupResizeHandler() {
+        let currentColumnCount = this.getColumnCount();
+        let resizeTimeout;
+        
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const newColumnCount = this.getColumnCount();
+                if (newColumnCount !== currentColumnCount) {
+                    currentColumnCount = newColumnCount;
+                    this.renderGallery();
+                }
+            }, 250);
+        });
     }
 
     // ========================================
@@ -71,19 +93,23 @@ class PhotoGallery {
             placeholder
         }));
 
-        // Collect all unique tags for filtering
+        // Collect all unique tags and years for filtering
         this.allTags.clear();
+        this.allYears.clear();
         this.photos.forEach(photo => {
             photo.tags.forEach(tag => this.allTags.add(tag));
+            if (photo.year) {
+                this.allYears.add(photo.year);
+            }
         });
 
-        // Calculate aspect ratios and sort photos by width (widest first)
+        // Calculate aspect ratios and sort photos by number of tags
         this.calculateAspectRatiosAndSort();
     }
 
     /**
-     * Asynchronously calculate aspect ratios and sort photos by width
-     * This ensures proper masonry layout with widest photos first
+     * Asynchronously calculate aspect ratios and sort photos by number of tags
+     * This ensures photos with more tags (more detailed/categorized) appear first
      */
     async calculateAspectRatiosAndSort() {
         const photoPromises = this.photos.map(photo => {
@@ -108,8 +134,8 @@ class PhotoGallery {
 
         await Promise.all(photoPromises);
         
-        // Sort by aspect ratio (widest first) for better masonry layout
-        this.photos.sort((a, b) => b.aspectRatio - a.aspectRatio);
+        // Sort by number of tags (most tags first)
+        this.photos.sort((a, b) => b.tags.length - a.tags.length);
         
         this.renderGallery();
         this.updateTagCounts();
@@ -171,11 +197,49 @@ class PhotoGallery {
         
         this.gallery.innerHTML = '';
         
-        filteredPhotos.forEach(photo => {
+        // Create columns for masonry layout
+        const columnCount = this.getColumnCount();
+        const columns = Array.from({ length: columnCount }, () => {
+            const column = document.createElement('div');
+            column.className = 'gallery-column';
+            return column;
+        });
+        
+        // Track column heights for balanced distribution
+        const columnHeights = Array(columnCount).fill(0);
+        
+        // Distribute photos to shortest column for balanced layout
+        filteredPhotos.forEach((photo) => {
             const photoItem = this.createPhotoElement(photo);
-            this.gallery.appendChild(photoItem);
+            
+            // Find the shortest column
+            const shortestColumnIndex = columnHeights.indexOf(Math.min(...columnHeights));
+            
+            // Add photo to shortest column
+            columns[shortestColumnIndex].appendChild(photoItem);
+            
+            // Update column height (using aspect ratio as proxy for height)
+            if (photo.aspectRatio) {
+                columnHeights[shortestColumnIndex] += 1 / photo.aspectRatio;
+            } else {
+                columnHeights[shortestColumnIndex] += 1.33; // Default aspect ratio
+            }
+            
             this.observer.observe(photoItem);
         });
+        
+        // Append columns to gallery
+        columns.forEach(column => this.gallery.appendChild(column));
+    }
+    
+    /**
+     * Get number of columns based on viewport width
+     */
+    getColumnCount() {
+        const width = window.innerWidth;
+        if (width >= 1400) return 3;
+        if (width >= 768) return 2;
+        return 1;
     }
 
     /**
@@ -185,6 +249,7 @@ class PhotoGallery {
         const photoItem = document.createElement('div');
         photoItem.className = 'photo-item';
         photoItem.dataset.tags = photo.tags.join(',');
+        photoItem.dataset.year = photo.year || '';
         
         const img = document.createElement('img');
         img.src = photo.placeholder;
@@ -210,15 +275,19 @@ class PhotoGallery {
     }
 
     /**
-     * Get photos filtered by active tags (AND logic)
+     * Get photos filtered by active tags and years (AND logic)
      */
     getFilteredPhotos() {
-        if (this.activeTags.size === 0) {
+        if (this.activeTags.size === 0 && this.activeYears.size === 0) {
             return this.photos;
         }
         
         return this.photos.filter(photo => {
-            return Array.from(this.activeTags).every(tag => photo.tags.includes(tag));
+            const tagsMatch = this.activeTags.size === 0 || 
+                Array.from(this.activeTags).every(tag => photo.tags.includes(tag));
+            const yearsMatch = this.activeYears.size === 0 || 
+                this.activeYears.has(photo.year);
+            return tagsMatch && yearsMatch;
         });
     }
 
@@ -392,9 +461,20 @@ class PhotoGallery {
      */
     renderTagSelector() {
         const sortedTags = Array.from(this.allTags).sort();
+        const sortedYears = Array.from(this.allYears).sort((a, b) => b - a); // Newest first
         
         this.tagSelector.innerHTML = `
             <div class="tag-filters">
+                ${sortedYears.length > 0 ? `
+                    <div class="year-filters">
+                        ${sortedYears.map(year => `
+                            <button class="year-button" data-year="${year}">
+                                <span class="year-text">${year}</span>
+                                <span class="year-count"></span>
+                            </button>
+                        `).join('')}
+                    </div>
+                ` : ''}
                 ${sortedTags.map(tag => `
                     <button class="tag-button" data-tag="${tag}">
                         <span class="tag-text">${tag}</span>
@@ -405,13 +485,18 @@ class PhotoGallery {
             </div>
         `;
         
-        // Add event listeners
+        // Add event listeners for tags
         this.tagSelector.querySelectorAll('.tag-button').forEach(button => {
             button.addEventListener('click', () => this.toggleTag(button.dataset.tag));
         });
         
+        // Add event listeners for years
+        this.tagSelector.querySelectorAll('.year-button').forEach(button => {
+            button.addEventListener('click', () => this.toggleYear(parseInt(button.dataset.year)));
+        });
+        
         this.tagSelector.querySelector('.clear-filters').addEventListener('click', () => {
-            this.clearAllTags();
+            this.clearAllFilters();
         });
     }
 
@@ -431,10 +516,26 @@ class PhotoGallery {
     }
 
     /**
-     * Clear all active tags
+     * Toggle year selection
      */
-    clearAllTags() {
+    toggleYear(year) {
+        if (this.activeYears.has(year)) {
+            this.activeYears.delete(year);
+        } else {
+            this.activeYears.add(year);
+        }
+        
+        this.updateTagSelector();
+        this.renderGallery();
+        this.updateTagCounts();
+    }
+
+    /**
+     * Clear all active tags and years
+     */
+    clearAllFilters() {
         this.activeTags.clear();
+        this.activeYears.clear();
         this.updateTagSelector();
         this.renderGallery();
         this.updateTagCounts();
@@ -446,29 +547,39 @@ class PhotoGallery {
     updateTagSelector() {
         const clearButton = this.tagSelector.querySelector('.clear-filters');
         const tagButtons = this.tagSelector.querySelectorAll('.tag-button');
+        const yearButtons = this.tagSelector.querySelectorAll('.year-button');
         
         // Show/hide clear button
-        clearButton.style.display = this.activeTags.size > 0 ? 'inline-block' : 'none';
+        clearButton.style.display = (this.activeTags.size > 0 || this.activeYears.size > 0) ? 'inline-block' : 'none';
         
-        // Update button states
+        // Update tag button states
         tagButtons.forEach(button => {
             const isActive = this.activeTags.has(button.dataset.tag);
+            button.classList.toggle('active', isActive);
+        });
+        
+        // Update year button states
+        yearButtons.forEach(button => {
+            const year = parseInt(button.dataset.year);
+            const isActive = this.activeYears.has(year);
             button.classList.toggle('active', isActive);
         });
     }
 
     /**
-     * Update tag counts based on current selection
+     * Update tag and year counts based on current selection
      */
     updateTagCounts() {
         const tagButtons = this.tagSelector.querySelectorAll('.tag-button');
+        const yearButtons = this.tagSelector.querySelectorAll('.year-button');
         
+        // Update tag counts
         tagButtons.forEach(button => {
             const tag = button.dataset.tag;
             const countSpan = button.querySelector('.tag-count');
             
-            if (this.activeTags.size === 0) {
-                // No tags selected - show total count for each tag
+            if (this.activeTags.size === 0 && this.activeYears.size === 0) {
+                // No filters selected - show total count for each tag
                 const matchingPhotos = this.photos.filter(photo => photo.tags.includes(tag));
                 const count = matchingPhotos.length;
                 countSpan.textContent = `(${count})`;
@@ -483,13 +594,49 @@ class PhotoGallery {
                 // Calculate potential matches if this tag were added
                 const potentialTags = new Set([...this.activeTags, tag]);
                 const matchingPhotos = this.photos.filter(photo => {
-                    return Array.from(potentialTags).every(t => photo.tags.includes(t));
+                    const tagsMatch = Array.from(potentialTags).every(t => photo.tags.includes(t));
+                    const yearsMatch = this.activeYears.size === 0 || this.activeYears.has(photo.year);
+                    return tagsMatch && yearsMatch;
                 });
                 
                 const count = matchingPhotos.length;
                 countSpan.textContent = `(${count})`;
                 countSpan.style.color = count > 0 ? '#666' : '#ccc';
                 button.querySelector('.tag-text').style.color = count > 0 ? '#333' : '#ccc';
+            }
+        });
+        
+        // Update year counts
+        yearButtons.forEach(button => {
+            const year = parseInt(button.dataset.year);
+            const countSpan = button.querySelector('.year-count');
+            
+            if (this.activeTags.size === 0 && this.activeYears.size === 0) {
+                // No filters selected - show total count for each year
+                const matchingPhotos = this.photos.filter(photo => photo.year === year);
+                const count = matchingPhotos.length;
+                countSpan.textContent = `(${count})`;
+                countSpan.style.color = '#666';
+                button.querySelector('.year-text').style.color = '#333';
+            } else if (this.activeYears.has(year)) {
+                // This year is active - show current filtered count
+                const filteredPhotos = this.getFilteredPhotos();
+                countSpan.textContent = `(${filteredPhotos.length})`;
+                countSpan.style.color = '#fff';
+            } else {
+                // Calculate potential matches if this year were added
+                const potentialYears = new Set([...this.activeYears, year]);
+                const matchingPhotos = this.photos.filter(photo => {
+                    const tagsMatch = this.activeTags.size === 0 || 
+                        Array.from(this.activeTags).every(t => photo.tags.includes(t));
+                    const yearsMatch = potentialYears.has(photo.year);
+                    return tagsMatch && yearsMatch;
+                });
+                
+                const count = matchingPhotos.length;
+                countSpan.textContent = `(${count})`;
+                countSpan.style.color = count > 0 ? '#666' : '#ccc';
+                button.querySelector('.year-text').style.color = count > 0 ? '#333' : '#ccc';
             }
         });
     }
