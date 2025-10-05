@@ -42,7 +42,6 @@ class PhotoGallery {
     init() {
         this.setupIntersectionObserver();
         this.loadPhotoData();
-        this.renderTagSelector();
         this.setupEventHandlers();
     }
 
@@ -124,6 +123,8 @@ class PhotoGallery {
             }
         });
         
+        // Render tag selector now that we have all tags and years
+        this.renderTagSelector();
         this.renderGallery();
         this.updateTagCounts();
     }
