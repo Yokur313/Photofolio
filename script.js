@@ -178,14 +178,15 @@ class PhotoGallery {
                 photo.width = tempImg.width;
                 photo.height = tempImg.height;
                 photo.dimensionsLoaded = true;
+                
+                // Update aspect ratio on the img element
+                img.style.aspectRatio = `${photo.aspectRatio}`;
             }
             
             // Swap to actual image
             img.src = actualSrc;
             photoItem.classList.add('loaded');
             img.style.opacity = '1';
-            img.style.height = 'auto';
-            img.style.minHeight = '0';
             delete img.dataset.loading;
         };
         
@@ -269,13 +270,9 @@ class PhotoGallery {
         img.dataset.src = photo.src;
         img.alt = photo.alt;
         
-        // Set dimensions if available to prevent layout shift
-        if (photo.width && photo.height) {
-            const aspectRatio = photo.height / photo.width;
-            img.style.aspectRatio = `${photo.width} / ${photo.height}`;
-            // Set a reasonable height based on column width estimate
-            const estimatedWidth = 400; // Approximate column width
-            img.style.height = `${estimatedWidth * aspectRatio}px`;
+        // Set aspect ratio to prevent layout shift, but let width determine height
+        if (photo.aspectRatio) {
+            img.style.aspectRatio = `${photo.aspectRatio}`;
         }
         
         photoItem.appendChild(img);
