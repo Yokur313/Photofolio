@@ -108,11 +108,18 @@ class PhotoGallery {
     }
 
     /**
-     * Asynchronously calculate aspect ratios and sort photos by number of tags
-     * This ensures photos with more tags (more detailed/categorized) appear first
+     * Sort photos by number of tags and render gallery
+     * No need to pre-load images - dimensions will be calculated on-demand
      */
     async calculateAspectRatiosAndSort() {
-        const photoPromises = this.photos.map(photo => {
+        // Sort by number of tags (most tags first)
+        this.photos.sort((a, b) => b.tags.length - a.tags.length);
+        
+        // Load dimensions for first few images only (for initial layout)
+        const initialLoadCount = Math.min(10, this.photos.length);
+        const initialPhotos = this.photos.slice(0, initialLoadCount);
+        
+        const photoPromises = initialPhotos.map(photo => {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
@@ -134,8 +141,14 @@ class PhotoGallery {
 
         await Promise.all(photoPromises);
         
-        // Sort by number of tags (most tags first)
-        this.photos.sort((a, b) => b.tags.length - a.tags.length);
+        // Set default dimensions for remaining photos
+        this.photos.slice(initialLoadCount).forEach(photo => {
+            if (!photo.aspectRatio) {
+                photo.aspectRatio = 1.33; // Default 4:3
+                photo.width = 1200;
+                photo.height = 900;
+            }
+        });
         
         this.renderGallery();
         this.updateTagCounts();
@@ -151,8 +164,8 @@ class PhotoGallery {
     setupIntersectionObserver() {
         const options = {
             root: null,
-            rootMargin: '50px',
-            threshold: 0.1
+            rootMargin: '200px', // Load images 200px before they enter viewport
+            threshold: 0.01
         };
 
         this.observer = new IntersectionObserver((entries) => {
@@ -173,15 +186,33 @@ class PhotoGallery {
         const actualSrc = img.dataset.src;
         
         if (actualSrc && !img.src.includes(actualSrc)) {
-            img.src = actualSrc;
-            img.onload = () => {
+            // Create a new image to load in background
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
+                // Update actual dimensions once loaded
+                const photo = this.photos.find(p => p.src === actualSrc);
+                if (photo && !photo.dimensionsLoaded) {
+                    photo.aspectRatio = tempImg.width / tempImg.height;
+                    photo.width = tempImg.width;
+                    photo.height = tempImg.height;
+                    photo.dimensionsLoaded = true;
+                }
+                
+                // Swap to actual image
+                img.src = actualSrc;
                 photoItem.classList.add('loaded');
                 img.style.opacity = '1';
-                // Reset height to auto once image is loaded to allow natural sizing
                 img.style.height = 'auto';
-                // Remove min-height once loaded
                 img.style.minHeight = '0';
             };
+            
+            tempImg.onerror = () => {
+                // Still try to load the image even if temp load fails
+                img.src = actualSrc;
+            };
+            
+            tempImg.src = actualSrc;
         }
     }
 
@@ -255,7 +286,6 @@ class PhotoGallery {
         img.src = photo.placeholder;
         img.dataset.src = photo.src;
         img.alt = photo.alt;
-        img.loading = 'lazy';
         
         // Set dimensions if available to prevent layout shift
         if (photo.width && photo.height) {
