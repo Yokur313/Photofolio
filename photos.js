@@ -113,7 +113,7 @@ const PHOTO_CONFIG = [
         id: 16,
         src: 'images/mobile-police-station.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['urban', 'street', 'city'],
+        tags: ['urban', 'street', 'city', ],
         year: 2018
     },
     {
@@ -141,7 +141,7 @@ const PHOTO_CONFIG = [
         id: 20,
         src: 'images/a-man-posing-alongside-cliffs.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['people', 'landscape', 'cliffs', 'nature', 'ireland', 'water', 'clouds'],
+        tags: ['people', 'landscape', 'ireland', 'water'],
         year: 2024
     },
     {
@@ -169,7 +169,7 @@ const PHOTO_CONFIG = [
         id: 24,
         src: 'images/bee-and-pollen.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['macro', 'nature', 'bee', 'insect', 'animal'],
+        tags: ['macro', 'nature', 'bee', 'insect', 'animal', 'ireland'],
         year: 2024
     },
     {
@@ -309,7 +309,7 @@ const PHOTO_CONFIG = [
         id: 44,
         src: 'images/ladie\'s-view-in-kerry.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['landscape', 'nature', 'ireland', 'mountain'],
+        tags: ['landscape', 'nature', 'ireland', 'mountain', 'river', 'clouds'],
         year: 2023
     },
     {
@@ -323,7 +323,7 @@ const PHOTO_CONFIG = [
         id: 46,
         src: 'images/pearls-of-water-on-moss.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['macro', 'nature', 'water'],
+        tags: ['macro', 'nature', 'water', 'ireland'],
         year: 2023
     },
     {
@@ -379,7 +379,7 @@ const PHOTO_CONFIG = [
         id: 54,
         src: 'images/shanghai-night-view.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['urban', 'city', 'night', 'lights'],
+        tags: ['urban', 'city', 'night', 'lights', 'river'],
         year: 2018
     },
     {
@@ -400,7 +400,7 @@ const PHOTO_CONFIG = [
         id: 57,
         src: 'images/sika-deer-grazing.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['nature', 'animal', 'ireland', 'water', 'clouds'],
+        tags: ['nature', 'animal', 'ireland', 'water', 'clouds', 'river'],
         year: 2023
     },
     {
