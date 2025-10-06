@@ -166,20 +166,20 @@ class PhotoGallery {
         const actualSrc = img.dataset.src;
         
         // Check if already loaded or loading
-        if (!actualSrc || img.src.includes(actualSrc) || img.dataset.loading === 'true') {
+        if (!actualSrc || img.src === actualSrc || img.dataset.loading === 'true') {
             return;
         }
         
         // Mark as loading to prevent duplicate requests
         img.dataset.loading = 'true';
         
-        // Create a new image to load in background
-        const tempImg = new Image();
-        
-        tempImg.onload = () => {
-            // Update actual dimensions once loaded
-            const photo = this.photos.find(p => p.src === actualSrc);
-            if (photo && !photo.dimensionsLoaded) {
+        // Update actual dimensions and swap to actual image
+        const photo = this.photos.find(p => p.src === actualSrc);
+        if (photo && !photo.dimensionsLoaded) {
+            // Create a temporary image to get dimensions without loading twice
+            const tempImg = new Image();
+            
+            tempImg.onload = () => {
                 photo.aspectRatio = tempImg.width / tempImg.height;
                 photo.width = tempImg.width;
                 photo.height = tempImg.height;
@@ -187,22 +187,17 @@ class PhotoGallery {
                 
                 // Update aspect ratio on the img element
                 img.style.aspectRatio = `${photo.aspectRatio}`;
-            }
+            };
             
-            // Swap to actual image
-            img.src = actualSrc;
-            photoItem.classList.add('loaded');
-            img.style.opacity = '1';
-            delete img.dataset.loading;
-        };
+            // Load dimensions in background, but don't wait for it
+            tempImg.src = actualSrc;
+        }
         
-        tempImg.onerror = () => {
-            // Still try to load the image even if temp load fails
-            img.src = actualSrc;
-            delete img.dataset.loading;
-        };
-        
-        tempImg.src = actualSrc;
+        // Directly set the image source (only one load)
+        img.src = actualSrc;
+        photoItem.classList.add('loaded');
+        img.style.opacity = '1';
+        delete img.dataset.loading;
     }
 
     // ========================================
@@ -338,14 +333,18 @@ class PhotoGallery {
         
         // Find the photo data to get full image path
         const photo = this.photos.find(p => p.src === thumbnailSrc);
-        if (photo && photo.fullImage && !img.dataset.fullImageLoaded) {
-            // Load full-resolution image
-            const fullImg = new Image();
-            fullImg.onload = () => {
-                img.src = photo.fullImage;
+        if (photo && photo.fullImage && img.dataset.fullImageLoaded !== 'true' && img.dataset.fullImageLoaded !== 'loading') {
+            // Mark as loading to prevent duplicate requests
+            img.dataset.fullImageLoaded = 'loading';
+            
+            // Directly set the full image source - browser will cache it
+            img.onload = () => {
                 img.dataset.fullImageLoaded = 'true';
             };
-            fullImg.src = photo.fullImage;
+            img.onerror = () => {
+                img.dataset.fullImageLoaded = 'false';
+            };
+            img.src = photo.fullImage;
         }
         
         // Adjust positioning for very tall images
@@ -614,12 +613,13 @@ class PhotoGallery {
                 const count = matchingPhotos.length;
                 countSpan.textContent = `(${count})`;
                 countSpan.style.color = '#666';
-                button.querySelector('.tag-text').style.color = '#333';
+                button.querySelector('.tag-text').style.color = '';
             } else if (this.activeTags.has(tag)) {
                 // This tag is active - show current filtered count
                 const filteredPhotos = this.getFilteredPhotos();
                 countSpan.textContent = `(${filteredPhotos.length})`;
                 countSpan.style.color = '#fff';
+                button.querySelector('.tag-text').style.color = '';
             } else {
                 // Calculate potential matches if this tag were added
                 const potentialTags = new Set([...this.activeTags, tag]);
@@ -632,7 +632,7 @@ class PhotoGallery {
                 const count = matchingPhotos.length;
                 countSpan.textContent = `(${count})`;
                 countSpan.style.color = count > 0 ? '#666' : '#ccc';
-                button.querySelector('.tag-text').style.color = count > 0 ? '#333' : '#ccc';
+                button.querySelector('.tag-text').style.color = count > 0 ? '' : '#ccc';
             }
         });
         
@@ -647,12 +647,13 @@ class PhotoGallery {
                 const count = matchingPhotos.length;
                 countSpan.textContent = `(${count})`;
                 countSpan.style.color = '#666';
-                button.querySelector('.year-text').style.color = '#333';
+                button.querySelector('.year-text').style.color = '';
             } else if (this.activeYears.has(year)) {
                 // This year is active - show current filtered count
                 const filteredPhotos = this.getFilteredPhotos();
                 countSpan.textContent = `(${filteredPhotos.length})`;
                 countSpan.style.color = '#fff';
+                button.querySelector('.year-text').style.color = '';
             } else {
                 // Calculate potential matches if this year were added
                 const potentialYears = new Set([...this.activeYears, year]);
@@ -666,7 +667,7 @@ class PhotoGallery {
                 const count = matchingPhotos.length;
                 countSpan.textContent = `(${count})`;
                 countSpan.style.color = count > 0 ? '#666' : '#ccc';
-                button.querySelector('.year-text').style.color = count > 0 ? '#333' : '#ccc';
+                button.querySelector('.year-text').style.color = count > 0 ? '' : '#ccc';
             }
         });
     }
@@ -708,13 +709,13 @@ class PhotoGallery {
         const x = event.clientX - imgRect.left;
         const y = event.clientY - imgRect.top;
         
-        // Set magnifier image source - use full resolution if available
-        const thumbnailSrc = img.dataset.src || img.src;
-        const photo = this.photos.find(p => p.src === thumbnailSrc);
-        const magnifierSrc = (photo && photo.fullImage && img.dataset.fullImageLoaded) ? photo.fullImage : img.src;
-        
-        if (this.magnifierImage.src !== magnifierSrc) {
-            this.magnifierImage.src = magnifierSrc;
+        // Set magnifier image source ONCE - use the SAME source as the main image
+        // This ensures we use the browser's cache and don't trigger a new load
+        if (!this.magnifierImage.dataset.currentSrc || this.magnifierImage.dataset.currentSrc !== img.src) {
+            // Use img.src directly - it's already the full image if loaded, or thumbnail if not
+            // This way we use whatever is already loaded and cached by the browser
+            this.magnifierImage.src = img.src;
+            this.magnifierImage.dataset.currentSrc = img.src; // Track which photo we're magnifying
         }
         
         // Position magnifier square near cursor
@@ -760,6 +761,10 @@ class PhotoGallery {
      */
     hideMagnifier() {
         this.magnifier.style.display = 'none';
+        // Clear the cached source so it resets for next photo
+        if (this.magnifierImage.dataset.currentSrc) {
+            delete this.magnifierImage.dataset.currentSrc;
+        }
     }
 
     // ========================================

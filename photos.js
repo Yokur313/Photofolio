@@ -153,7 +153,7 @@ const PHOTO_CONFIG = [
         thumbnail: 'thumbnails/a-man-and-his-friend.jpg',
         src: 'images/a-man-and-his-friend.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['people', 'animal', 'nature', 'ireland', 'eery'],
+        tags: ['people', 'animal', 'nature', 'ireland', 'eery', 'landscape'],
         year: 2023
     },
     {
@@ -257,7 +257,7 @@ const PHOTO_CONFIG = [
         thumbnail: 'thumbnails/crowd-in-powerscourt-waterfall.jpg',
         src: 'images/crowd-in-powerscourt-waterfall.jpg',
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['landscape', 'nature', 'water', 'people', 'ireland', 'mountain'],
+        tags: ['landscape', 'nature', 'water', 'people', 'ireland', 'summer'],
         year: 2024
     },
     {
