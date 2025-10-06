@@ -87,9 +87,14 @@ class PhotoGallery {
         const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjlmOWY5Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJDb3VyaWVyLCBtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiNjY2MiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5sb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';
         
         // Load photos from external configuration
+        // Use thumbnail for gallery display, full image (src) for enlarged view
         this.photos = window.PHOTO_CONFIG.map(photo => ({
             ...photo,
-            placeholder
+            placeholder,
+            // Store full image path separately for enlarged view
+            fullImage: photo.src,
+            // Use thumbnail for gallery display
+            src: photo.thumbnail
         }));
 
         // Collect all unique tags and years for filtering
@@ -327,6 +332,22 @@ class PhotoGallery {
         photoItem.classList.add('enlarged');
         this.enlargedPhoto = photoItem;
         
+        // Load full-resolution image when enlarging
+        const img = photoItem.querySelector('img');
+        const thumbnailSrc = img.dataset.src || img.src;
+        
+        // Find the photo data to get full image path
+        const photo = this.photos.find(p => p.src === thumbnailSrc);
+        if (photo && photo.fullImage && !img.dataset.fullImageLoaded) {
+            // Load full-resolution image
+            const fullImg = new Image();
+            fullImg.onload = () => {
+                img.src = photo.fullImage;
+                img.dataset.fullImageLoaded = 'true';
+            };
+            fullImg.src = photo.fullImage;
+        }
+        
         // Adjust positioning for very tall images
         setTimeout(() => {
             const photoRect = photoItem.getBoundingClientRect();
@@ -341,7 +362,6 @@ class PhotoGallery {
         }, 50);
         
         // Show caption with formatted filename after photo is fully positioned
-        const img = photoItem.querySelector('img');
         if (img && img.src) {
             const caption = this.formatCaption(img.src);
             this.photoCaption.textContent = caption;
@@ -688,9 +708,13 @@ class PhotoGallery {
         const x = event.clientX - imgRect.left;
         const y = event.clientY - imgRect.top;
         
-        // Set magnifier image source
-        if (this.magnifierImage.src !== img.src) {
-            this.magnifierImage.src = img.src;
+        // Set magnifier image source - use full resolution if available
+        const thumbnailSrc = img.dataset.src || img.src;
+        const photo = this.photos.find(p => p.src === thumbnailSrc);
+        const magnifierSrc = (photo && photo.fullImage && img.dataset.fullImageLoaded) ? photo.fullImage : img.src;
+        
+        if (this.magnifierImage.src !== magnifierSrc) {
+            this.magnifierImage.src = magnifierSrc;
         }
         
         // Position magnifier square near cursor

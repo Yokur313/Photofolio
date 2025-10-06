@@ -30,6 +30,3 @@ yarn-error.log*
 # Build outputs (if you add any build process later)
 dist/
 build/
-
-# Image backups
-images-backup/
