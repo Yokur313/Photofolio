@@ -265,7 +265,7 @@ const PHOTO_CONFIG = [
         thumbnail: 'thumbnails/dublin-commuter.jpg',
         src: 'images/dublin-commuter.jpg',  
         alt: 'Photography by Arthur Stainmesse',
-        tags: ['urban', 'people', 'street', 'city', 'ireland', 'motion', 'lightss'],
+        tags: ['urban', 'people', 'street', 'city', 'ireland', 'motion', 'lights'],
         year: 2025
     },
     {
